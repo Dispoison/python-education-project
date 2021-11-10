@@ -8,6 +8,9 @@ flask = "*"
 sqlalchemy = "*"
 pylint = "*"
 flask-sqlalchemy = "*"
+pylint-flask = "*"
+pylint-flask-sqlalchemy = "*"
+flask-migrate = "*"
 
 [dev-packages]
 
