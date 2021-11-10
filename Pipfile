@@ -11,6 +11,8 @@ flask-sqlalchemy = "*"
 pylint-flask = "*"
 pylint-flask-sqlalchemy = "*"
 flask-migrate = "*"
+flask-restx = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 
