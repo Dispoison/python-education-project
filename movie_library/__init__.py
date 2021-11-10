@@ -8,3 +8,4 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from movie_library import views
+from movie_library import models
