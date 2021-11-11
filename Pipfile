@@ -13,6 +13,8 @@ pylint-flask-sqlalchemy = "*"
 flask-migrate = "*"
 flask-restx = "*"
 psycopg2-binary = "*"
+flask-marshmallow = "*"
+marshmallow-sqlalchemy = "*"
 
 [dev-packages]
 
