@@ -6,3 +6,8 @@ def jsonify_no_content():
     response.mimetype = current_app.config['JSONIFY_MIMETYPE']
 
     return response
+
+
+def populate_default_if_none(data, key, default_value):
+    if data.get(key) is None:
+        data[key] = default_value

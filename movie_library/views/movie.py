@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 from movie_library import api, db
 from movie_library.models import Movie, Genre
 from movie_library.schema import MovieSchema
-from movie_library.utils import jsonify_no_content
+from movie_library.utils import jsonify_no_content, populate_default_if_none
 
 movie_schema = MovieSchema()
 movies_schema = MovieSchema(many=True)
@@ -16,6 +16,8 @@ class MoviesResource(Resource):
     def get(self):
         movies = Movie.query.all()
         output = movies_schema.dump(movies)
+        for movie in output:
+            populate_default_if_none(movie, 'director', 'unknown')
         return jsonify(output)
 
     @login_required
@@ -39,6 +41,7 @@ class MovieResource(Resource):
     def get(self, movie_id):
         movie = Movie.query.get_or_404(movie_id)
         output = movie_schema.dump(movie)
+        populate_default_if_none(output, 'director', 'unknown')
         return jsonify(output)
 
     @login_required
@@ -66,3 +69,4 @@ class MovieResource(Resource):
         db.session.delete(movie)
         db.session.commit()
         return jsonify_no_content()
+
