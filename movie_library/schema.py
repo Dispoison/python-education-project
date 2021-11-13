@@ -1,7 +1,7 @@
 from marshmallow_sqlalchemy import fields
 
 from movie_library import ma
-from movie_library.models import Movie, Director, Genre, Country, AgeRestriction
+from movie_library.models import Movie, Director, Genre, Country, AgeRestriction, User
 
 
 class DirectorSchema(ma.SQLAlchemyAutoSchema):
@@ -34,4 +34,10 @@ class CountrySchema(ma.SQLAlchemyAutoSchema):
 class AgeRestrictionSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = AgeRestriction
+        load_instance = True
+
+
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
         load_instance = True

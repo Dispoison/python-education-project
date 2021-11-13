@@ -1,5 +1,6 @@
 from flask import jsonify, request, make_response
 from flask_restx import Resource
+from flask_login import login_required, current_user
 
 from movie_library import api, db
 from movie_library.models import Movie, Genre
@@ -17,10 +18,12 @@ class MoviesResource(Resource):
         output = movies_schema.dump(movies)
         return jsonify(output)
 
+    @login_required
     def post(self):
         genres_ids = request.json.get('genres', [])
         if 'genres' in request.json:
             del request.json['genres']
+        request.json['user_id'] = current_user.get_id()
         movie = movie_schema.load(request.json, session=db.session)
         genres = Genre.query.filter(Genre.id.in_(genres_ids)).all()
 
@@ -38,11 +41,15 @@ class MovieResource(Resource):
         output = movie_schema.dump(movie)
         return jsonify(output)
 
+    @login_required
     def put(self, movie_id):
+        movie = Movie.query.get_or_404(movie_id)
+        if not (current_user.is_admin or current_user.id == movie.user_id):
+            return make_response({'message': 'A movie can only be edited by the user who added it '
+                                             'or by the administrator.'}, 403)
         genres_ids = request.json.get('genres', [])
         if 'genres' in request.json:
             del request.json['genres']
-        movie = Movie.query.get_or_404(movie_id)
         movie_updated = movie_schema.load(request.json, instance=movie, session=db.session)
         genres = Genre.query.filter(Genre.id.in_(genres_ids)).all()
 
@@ -53,6 +60,9 @@ class MovieResource(Resource):
 
     def delete(self, movie_id):
         movie = Movie.query.get_or_404(movie_id)
+        if not (current_user.is_admin or current_user.id == movie.user_id):
+            return make_response({'message': 'A movie can only be deleted by the user who added it '
+                                             'or by the administrator.'}, 403)
         db.session.delete(movie)
         db.session.commit()
         return jsonify_no_content()
