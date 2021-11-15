@@ -20,6 +20,7 @@ class MovieSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Movie
         load_instance = True
+        include_fk = True
         include_relationships = True
     genres = fields.Nested(GenreSchema, many=True)
     director = fields.Nested(DirectorSchema)

@@ -8,7 +8,7 @@ from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config.from_object("config.DevelopmentConfig")
-db = SQLAlchemy(app)
+db: SQLAlchemy = SQLAlchemy(app)
 migrate = Migrate(app, db)
 api = Api(app)
 ma = Marshmallow(app)
