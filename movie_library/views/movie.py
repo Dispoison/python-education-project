@@ -1,6 +1,7 @@
 from flask import jsonify, request, make_response
 from flask_restx import Resource
 from flask_login import login_required, current_user
+from sqlalchemy.exc import NoResultFound
 
 from movie_library import api, db
 from movie_library.models import Movie, Genre
@@ -14,7 +15,21 @@ movies_schema = MovieSchema(many=True)
 @api.route('/movies')
 class MoviesResource(Resource):
     def get(self):
-        movies = Movie.query.all()
+        try:
+            search_data = request.args.get('q', '')
+            sort_data = request.args.getlist('sort')
+            page = int(request.args.get('page', 1))
+            page_size = int(request.args.get('page_size', 10))
+            release_date_range = request.args.get('release_date_range', ',')
+            directors = request.args.get('directors', '').split(',')
+            genres = request.args.get('genres', ',').split(',')
+
+            movies = Movie.get_movies_by(search_data, sort_data, page, page_size, release_date_range, directors, genres)
+        except ValueError as value_error:
+            return make_response({'message': str(value_error)}, 400)
+        except NoResultFound as not_found:
+            return make_response({'message': str(not_found)}, 404)
+
         output = movies_schema.dump(movies)
         for movie in output:
             populate_default_if_none(movie, 'director', 'unknown')
@@ -61,6 +76,7 @@ class MovieResource(Resource):
         output = movie_schema.dump(movie_updated)
         return jsonify(output)
 
+    @login_required
     def delete(self, movie_id):
         movie = Movie.query.get_or_404(movie_id)
         if not (current_user.is_admin or current_user.id == movie.user_id):
@@ -69,4 +85,3 @@ class MovieResource(Resource):
         db.session.delete(movie)
         db.session.commit()
         return jsonify_no_content()
-
