@@ -1,48 +1,48 @@
-from flask import jsonify, request, make_response
+from flask import request
 from flask_restx import Resource
 
 from movie_library import api, db
-from movie_library.models import Country
+from movie_library.models import Country, country_model
 from movie_library.schema import CountrySchema
-from movie_library.utils import jsonify_no_content
+from movie_library.utils import admin_required, get_all_or_404, \
+    add_model_object, update_model_object, delete_model_object
+
 
 country_schema = CountrySchema()
-countries_schema = CountrySchema(many=True)
+
+country_ns = api.namespace(name='Country', path='/countries', description='country methods')
 
 
-@api.route('/countries')
+@country_ns.route('')
 class CountriesResource(Resource):
+    @country_ns.marshal_list_with(country_model)
     def get(self):
-        countries = Country.query.all()
-        output = countries_schema.dump(countries)
-        return jsonify(output)
+        return get_all_or_404(Country, 'No countries found.')
 
+    @admin_required
+    @country_ns.expect(country_model)
+    @country_ns.marshal_with(country_model, code=201, description='The country was successfully created')
     def post(self):
         country = country_schema.load(request.json, session=db.session)
-
-        db.session.add(country)
-        db.session.commit()
-        output = country_schema.dump(country)
-        return make_response(jsonify(output), 201)
+        return add_model_object(country)
 
 
-@api.route('/country/<int:country_id>')
+@country_ns.route('/<int:country_id>')
 class CountryResource(Resource):
+    @country_ns.marshal_with(country_model)
     def get(self, country_id):
-        country = Country.query.get_or_404(country_id)
-        output = country_schema.dump(country)
-        return jsonify(output)
+        return Country.query.get_or_404(country_id)
 
+    @admin_required
+    @country_ns.expect(country_model)
+    @country_ns.marshal_with(country_model)
     def put(self, country_id):
         country = Country.query.get_or_404(country_id)
-        country_updated = country_schema.load(request.json, instance=country, session=db.session)
+        country = country_schema.load(request.json, instance=country, session=db.session, partial=True)
+        return update_model_object(country)
 
-        db.session.commit()
-        output = country_schema.dump(country_updated)
-        return jsonify(output)
-
+    @admin_required
+    @country_ns.response(204, 'Successfully deleted')
     def delete(self, country_id):
         country = Country.query.get_or_404(country_id)
-        db.session.delete(country)
-        db.session.commit()
-        return jsonify_no_content()
+        return delete_model_object(country)

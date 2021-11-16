@@ -1,6 +1,7 @@
 class Config:
     DEBUG = False
     SECRET_KEY = 'gk8V4MspZKC6jg8w0MGyjvF5b9BnUEwq'
+    RESTX_MASK_SWAGGER = False
 
 
 class ProductionConfig(Config):
@@ -9,6 +10,7 @@ class ProductionConfig(Config):
 
 class DevelopmentConfig(Config):
     DEBUG = True
+
     DB_USER = 'postgres'
     DB_PASSWORD = 'postgres_password'
     DB_HOST = 'localhost'

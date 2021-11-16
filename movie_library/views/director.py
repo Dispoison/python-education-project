@@ -1,48 +1,61 @@
-from flask import jsonify, request, make_response
+from flask import request, abort
 from flask_restx import Resource
+from sqlalchemy.exc import NoResultFound
 
 from movie_library import api, db
-from movie_library.models import Director
+from movie_library.models import Director, director_model
 from movie_library.schema import DirectorSchema
-from movie_library.utils import jsonify_no_content
+from movie_library.utils import admin_required, add_model_object, update_model_object, delete_model_object
+
 
 director_schema = DirectorSchema()
-directors_schema = DirectorSchema(many=True)
+
+director_ns = api.namespace(name='Director', path='/directors', description='director methods')
 
 
-@api.route('/directors')
+@director_ns.route('')
 class DirectorsResource(Resource):
+    @director_ns.param('page_size', 'Number of movies on page (default: 10)')
+    @director_ns.param('page', 'Page number (default: 1)')
+    @director_ns.param('q', 'Searching for a director using a substring of the full name')
+    @director_ns.marshal_list_with(director_model)
     def get(self):
-        directors = Director.query.all()
-        output = directors_schema.dump(directors)
-        return jsonify(output)
+        try:
+            search_data = request.args.get('q')
+            page = int(request.args.get('page', 1))
+            page_size = int(request.args.get('page_size', 10))
 
+            directors = Director.get_directors_by(search_data, page, page_size)
+        except ValueError as value_error:
+            return abort(400, str(value_error))
+        except NoResultFound as not_found:
+            return abort(404, str(not_found))
+        return directors
+
+    @admin_required
+    @director_ns.expect(director_model)
+    @director_ns.marshal_with(director_model, code=201, description='The director was successfully created')
     def post(self):
         director = director_schema.load(request.json, session=db.session)
-
-        db.session.add(director)
-        db.session.commit()
-        output = director_schema.dump(director)
-        return make_response(jsonify(output), 201)
+        return add_model_object(director)
 
 
-@api.route('/director/<int:director_id>')
+@director_ns.route('/<int:director_id>')
 class DirectorResource(Resource):
+    @director_ns.marshal_with(director_model)
     def get(self, director_id):
-        director = Director.query.get_or_404(director_id)
-        output = director_schema.dump(director)
-        return jsonify(output)
+        return Director.query.get_or_404(director_id)
 
+    @admin_required
+    @director_ns.expect(director_model)
+    @director_ns.marshal_with(director_model)
     def put(self, director_id):
         director = Director.query.get_or_404(director_id)
-        director_updated = director_schema.load(request.json, instance=director, session=db.session)
+        director = director_schema.load(request.json, instance=director, session=db.session, partial=True)
+        return update_model_object(director)
 
-        db.session.commit()
-        output = director_schema.dump(director_updated)
-        return jsonify(output)
-
+    @admin_required
+    @director_ns.response(204, 'Successfully deleted')
     def delete(self, director_id):
         director = Director.query.get_or_404(director_id)
-        db.session.delete(director)
-        db.session.commit()
-        return jsonify_no_content()
+        return delete_model_object(director)

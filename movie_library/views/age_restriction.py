@@ -1,49 +1,51 @@
-from flask import jsonify, request, make_response
+from flask import request
 from flask_restx import Resource
 
 from movie_library import api, db
-from movie_library.models import AgeRestriction
+from movie_library.models import AgeRestriction, age_restriction_model
 from movie_library.schema import AgeRestrictionSchema
-from movie_library.utils import jsonify_no_content
+from movie_library.utils import admin_required, get_all_or_404, \
+    add_model_object, update_model_object, delete_model_object
+
 
 age_restriction_schema = AgeRestrictionSchema()
-age_restrictions_schema = AgeRestrictionSchema(many=True)
+
+age_restriction_ns = api.namespace(name='AgeRestriction', path='/age_restrictions',
+                                   description='age restriction methods')
 
 
-@api.route('/age_restrictions')
+@age_restriction_ns.route('')
 class AgeRestrictionsResource(Resource):
+    @age_restriction_ns.marshal_list_with(age_restriction_model)
     def get(self):
-        age_restrictions = AgeRestriction.query.all()
-        output = age_restrictions_schema.dump(age_restrictions)
-        return jsonify(output)
+        return get_all_or_404(AgeRestriction, 'No age restrictions found.')
 
+    @admin_required
+    @age_restriction_ns.expect(age_restriction_model)
+    @age_restriction_ns.marshal_with(age_restriction_model, code=201,
+                                     description='The age restriction was successfully created')
     def post(self):
         age_restriction = age_restriction_schema.load(request.json, session=db.session)
-
-        db.session.add(age_restriction)
-        db.session.commit()
-        output = age_restriction_schema.dump(age_restriction)
-        return make_response(jsonify(output), 201)
+        return add_model_object(age_restriction)
 
 
-@api.route('/age_restriction/<int:age_restriction_id>')
+@age_restriction_ns.route('/<int:age_restriction_id>')
 class AgeRestrictionResource(Resource):
+    @age_restriction_ns.marshal_with(age_restriction_model)
     def get(self, age_restriction_id):
-        age_restriction = AgeRestriction.query.get_or_404(age_restriction_id)
-        output = age_restriction_schema.dump(age_restriction)
-        return jsonify(output)
+        return AgeRestriction.query.get_or_404(age_restriction_id)
 
+    @admin_required
+    @age_restriction_ns.expect(age_restriction_model)
+    @age_restriction_ns.marshal_with(age_restriction_model)
     def put(self, age_restriction_id):
         age_restriction = AgeRestriction.query.get_or_404(age_restriction_id)
-        age_restriction_updated = age_restriction_schema.load(request.json,
-                                                              instance=age_restriction, session=db.session)
+        age_restriction = age_restriction_schema.load(request.json,
+                                                      instance=age_restriction, session=db.session)
+        return update_model_object(age_restriction)
 
-        db.session.commit()
-        output = age_restriction_schema.dump(age_restriction_updated)
-        return jsonify(output)
-
+    @admin_required
+    @age_restriction_ns.response(204, 'Successfully deleted')
     def delete(self, age_restriction_id):
         age_restriction = AgeRestriction.query.get_or_404(age_restriction_id)
-        db.session.delete(age_restriction)
-        db.session.commit()
-        return jsonify_no_content()
+        return delete_model_object(age_restriction)

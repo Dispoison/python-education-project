@@ -1,4 +1,13 @@
-from movie_library import db
+from flask_restx import fields
+
+from movie_library import db, api
+
+
+country_model = api.model('Country', {
+    'id': fields.Integer(readonly=True),
+    'title': fields.String(default='Country'),
+    'abbreviation': fields.String(default='CT')
+})
 
 
 class Country(db.Model):
