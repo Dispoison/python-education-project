@@ -1,4 +1,12 @@
-from movie_library import db
+from flask_restx import fields
+
+from movie_library import db, api
+
+
+genre_model = api.model('Genre', {
+    'id': fields.Integer(readonly=True),
+    'title': fields.String(),
+})
 
 
 class Genre(db.Model):

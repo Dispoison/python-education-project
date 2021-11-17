@@ -1,4 +1,12 @@
-from movie_library import db
+from flask_restx import fields
+
+from movie_library import db, api
+
+
+age_restriction_model = api.model('AgeRestriction', {
+    'id': fields.Integer(readonly=True),
+    'title': fields.String()
+})
 
 
 class AgeRestriction(db.Model):

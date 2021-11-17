@@ -1,8 +1,30 @@
 from datetime import datetime
 
+from flask_restx import fields
 from flask_login import UserMixin
 
-from movie_library import db, login_manager
+from movie_library import db, login_manager, api
+
+
+register_model = api.model('Register', {
+    'username': fields.String(),
+    'email': fields.String(),
+    'password': fields.String(),
+    'password2': fields.String(),
+    'first_name': fields.String(),
+    'last_name': fields.String(),
+})
+login_model = api.model('Login', {
+    'username_or_email': fields.String(),
+    'password': fields.String(),
+})
+user_info_model = api.model('UserInfo', {
+    'id': fields.Integer(readonly=True),
+    'username': fields.String(readonly=True),
+    'email': fields.String(readonly=True),
+    'first_name': fields.String(readonly=True),
+    'last_name': fields.String(readonly=True),
+})
 
 
 class User(db.Model, UserMixin):
