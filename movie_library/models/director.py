@@ -1,3 +1,5 @@
+"""Director model module"""
+
 from flask_restx import fields
 from sqlalchemy import func
 from sqlalchemy.exc import NoResultFound
@@ -26,8 +28,11 @@ class Director(db.Model):
     description = db.Column(db.Text)
     movies = db.relationship('Movie', backref='director', lazy=True)
 
+    def __str__(self):
+        return self.title
+
     def __repr__(self):
-        return f'<Director {self.first_name} {self.last_name}>'
+        return f'<Director \'{self.first_name} {self.last_name}\'>'
 
     @classmethod
     def get_directors_by(cls, search_data: str, page: int, page_size: int) -> list:
@@ -35,7 +40,8 @@ class Director(db.Model):
         director_query = cls.query
 
         if search_data:
-            director_query = director_query.filter(func.concat(cls.first_name, ' ', cls.last_name).ilike(f'%{search_data}%'))
+            director_query = director_query.filter(func.concat(cls.first_name, ' ', cls.last_name).
+                                                   ilike(f'%{search_data}%'))
 
         offset = page_size * (page - 1)
         directors = director_query.offset(offset).limit(page_size).all()

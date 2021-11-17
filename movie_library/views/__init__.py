@@ -1,3 +1,5 @@
+"""Views package"""
+
 from .movie import MoviesResource, MovieResource
 from .director import DirectorsResource, DirectorResource
 from .genre import GenresResource, GenreResource

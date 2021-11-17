@@ -1,3 +1,5 @@
+"""Schemas module"""
+
 from marshmallow_sqlalchemy import fields
 
 from movie_library import ma

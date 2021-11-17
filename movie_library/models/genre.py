@@ -1,3 +1,5 @@
+"""Genre model module"""
+
 from flask_restx import fields
 
 from movie_library import db, api
@@ -14,5 +16,8 @@ class Genre(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100))
 
+    def __str__(self):
+        return self.title
+
     def __repr__(self):
-        return f'<Genre {self.title}>'
+        return f'<Genre \'{self.title}\'>'
