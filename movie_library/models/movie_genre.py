@@ -1,3 +1,5 @@
+"""Secondary table movie_genre module"""
+
 from movie_library import db
 
 

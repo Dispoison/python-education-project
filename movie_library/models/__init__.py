@@ -1,3 +1,5 @@
+"""Models package"""
+
 from .movie_genre import movie_genre
 from .director import Director, director_model, director_info_model
 from .genre import Genre, genre_model

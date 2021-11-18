@@ -1,4 +1,7 @@
+"""Movie model module"""
+
 from datetime import datetime
+from typing import Union
 
 from flask_restx import fields
 from sqlalchemy import func, or_, case
@@ -56,8 +59,11 @@ class Movie(db.Model):
     genres = db.relationship('Genre', secondary=movie_genre,
                              backref=db.backref('movies'), lazy=True)
 
+    def __str__(self):
+        return self.title
+
     def __repr__(self):
-        return f'<Movie {self.title}>'
+        return f'<Movie \'{self.title}\'>'
 
     @classmethod
     def get_movies_by(cls, search_data: str, sort_data: str, page: int, page_size: int,
@@ -75,23 +81,30 @@ class Movie(db.Model):
 
         if release_date_range:
             date_range = release_date_range.split(',')
-            date_range[0] = MIN_DATE if date_range[0] == '' else datetime.strptime(date_range[0], '%Y-%m-%d')
-            date_range[1] = MAX_DATE if date_range[1] == '' else datetime.strptime(date_range[1], '%Y-%m-%d')
+
+            date_range[0] = MIN_DATE if date_range[0] == '' \
+                else datetime.strptime(date_range[0], '%Y-%m-%d')
+            date_range[1] = MAX_DATE if date_range[1] == '' \
+                else datetime.strptime(date_range[1], '%Y-%m-%d')
+
             movie_query = movie_query.filter(Movie.release_date.between(*date_range))
 
         if directors:
             directors = directors.split(',')
-            directors_conditions = [func.concat(Director.first_name, ' ', Director.last_name).ilike(f'%{director}%')
+            directors_conditions = [func.concat(Director.first_name, ' ',
+                                                Director.last_name).ilike(f'%{director}%')
                                     for director in directors]
             movie_query = movie_query.join(Movie.director).filter(or_(*directors_conditions))
 
         if genres:
             genres = genres.split(',')
             genres = list(map(str.lower, genres))
-            movie_query = movie_query.join(movie_genre, Movie.id == movie_genre.c.movie_id). \
+            movie_query = movie_query.\
+                join(movie_genre, Movie.id == movie_genre.c.movie_id). \
                 join(Genre, movie_genre.c.genre_id == Genre.id). \
-                group_by(Movie.id).\
-                having(func.sum(case((func.lower(Genre.title).in_(genres), 1), else_=0)) == len(genres))
+                group_by(Movie.id). \
+                having(func.sum(case((func.lower(Genre.title).
+                                      in_(genres), 1), else_=0)) == len(genres))
 
         offset = page_size * (page - 1)
         movies = movie_query.offset(offset).limit(page_size).all()
@@ -102,7 +115,8 @@ class Movie(db.Model):
         return movies
 
     @staticmethod
-    def cut_genres_from_request_json(request_json):
+    def cut_genres_from_request_json(request_json: dict) -> Union[list, None]:
+        """Cuts genres_ids from request.json if exist else return None"""
         genres = None
         if 'genres' in request_json:
             genres_ids = request_json.get('genres')

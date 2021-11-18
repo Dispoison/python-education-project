@@ -1,3 +1,5 @@
+"""User model module"""
+
 from datetime import datetime
 
 from flask_restx import fields
@@ -40,15 +42,20 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(50))
     movies = db.relationship('Movie', backref='user', lazy=True)
 
-    def __init__(self, username, email, password, first_name, last_name):
+    def __init__(self, username, email, password, first_name, last_name, is_admin=False):
+        """Constructor for registering new user"""
         self.username = username
         self.email = email
         self.password = password
         self.first_name = first_name
         self.last_name = last_name
+        self.is_admin = is_admin
+
+    def __str__(self):
+        return self.title
 
     def __repr__(self):
-        return f'<{"Admin" if self.is_admin else "User"} {self.username}>'
+        return f'<{"Admin" if self.is_admin else "User"} \'{self.username}\'>'
 
 
 @login_manager.user_loader

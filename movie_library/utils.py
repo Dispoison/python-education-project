@@ -1,4 +1,6 @@
-from typing import Type, List, Tuple
+"""Application utility functions"""
+
+from typing import Type, List, Tuple, Callable
 from functools import wraps
 
 from flask import abort
@@ -7,7 +9,9 @@ from flask_login import current_user
 from movie_library import db
 
 
-def get_order_objects_list(sort_data: List[str], model_cls: Type[db.Model], valid_sorting_values: tuple) -> list:
+def get_order_objects_list(sort_data: List[str], model_cls: Type[db.Model],
+                           valid_sorting_values: tuple) -> list:
+    """Gets order objects from sort data"""
     order_by = []
 
     if sort_data:
@@ -35,11 +39,13 @@ def get_order_objects_list(sort_data: List[str], model_cls: Type[db.Model], vali
 
 
 def verify_ownership_by_user_id(user_id: int, error_message: str):
+    """Checks ownership of current user according to user_id or if admin"""
     if not (current_user.is_admin or current_user.id == user_id):
         return abort(403, error_message)
 
 
-def admin_required(function):
+def admin_required(function: Callable):
+    """Decorator raises 403 exception if current user is not admin"""
     @wraps(function)
     def wrapper(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
@@ -49,6 +55,7 @@ def admin_required(function):
 
 
 def get_all_or_404(model_cls: Type[db.Model], not_found_msg: str) -> List[db.Model]:
+    """Gets list of objects and raises 404 exception if list is empty"""
     objects = model_cls.query.all()
     if not objects:
         return abort(404, not_found_msg)
@@ -56,19 +63,20 @@ def get_all_or_404(model_cls: Type[db.Model], not_found_msg: str) -> List[db.Mod
 
 
 def add_model_object(object_: db.Model) -> Tuple[str, int]:
+    """Adds model object to database"""
     db.session.add(object_)
     db.session.commit()
     return object_, 201
 
 
 def update_model_object(object_: db.Model) -> Tuple[str]:
+    """Updates model object"""
     db.session.commit()
     return object_
 
 
 def delete_model_object(object_: db.Model) -> Tuple[str, int]:
+    """Deletes model object"""
     db.session.delete(object_)
     db.session.commit()
     return '', 204
-
-

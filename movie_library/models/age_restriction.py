@@ -1,3 +1,5 @@
+"""Age restriction model module"""
+
 from flask_restx import fields
 
 from movie_library import db, api
@@ -16,5 +18,8 @@ class AgeRestriction(db.Model):
     title = db.Column(db.String(3))
     movies = db.relationship('Movie', backref='age_restriction', lazy=True)
 
+    def __str__(self):
+        return self.title
+
     def __repr__(self):
-        return f'<Age restriction {self.title}>'
+        return f'<Age restriction \'{self.title}\'>'

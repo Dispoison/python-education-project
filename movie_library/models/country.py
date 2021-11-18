@@ -1,3 +1,5 @@
+"""Country model module"""
+
 from flask_restx import fields
 
 from movie_library import db, api
@@ -17,5 +19,8 @@ class Country(db.Model):
     abbreviation = db.Column(db.String(2))
     movies = db.relationship('Movie', backref='country', lazy=True)
 
+    def __str__(self):
+        return self.title
+
     def __repr__(self):
-        return f'<Country {self.title} ({self.abbreviation})>'
+        return f'<Country \'{self.title}\' ({self.abbreviation})>'
