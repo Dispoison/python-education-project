@@ -17,6 +17,7 @@ flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 flask-login = "*"
 werkzeug = "*"
+marshmallow = "*"
 
 [dev-packages]
 

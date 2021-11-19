@@ -1,14 +1,14 @@
 """Age restriction view module"""
 
-from flask import request
+from flask import request, abort
 from flask_restx import Resource
+from marshmallow.exceptions import ValidationError
 
 from movie_library import api, db
 from movie_library.models import AgeRestriction, age_restriction_model
 from movie_library.schemes import AgeRestrictionSchema
 from movie_library.utils import admin_required, get_all_or_404, \
     add_model_object, update_model_object, delete_model_object
-
 
 age_restriction_schema = AgeRestrictionSchema()
 
@@ -19,6 +19,7 @@ age_restriction_ns = api.namespace(name='AgeRestriction', path='/age_restriction
 @age_restriction_ns.route('')
 class AgeRestrictionsResource(Resource):
     """Age restriction plural resource"""
+
     @age_restriction_ns.marshal_list_with(age_restriction_model)
     def get(self):
         """Returns list of age restriction objects"""
@@ -30,13 +31,19 @@ class AgeRestrictionsResource(Resource):
                                      description='The age restriction was successfully created')
     def post(self):
         """Creates age restriction and returns deserialized object"""
-        age_restriction = age_restriction_schema.load(request.json, session=db.session)
-        return add_model_object(age_restriction)
+        try:
+            age_restriction = age_restriction_schema.load(request.json, session=db.session)
+        except ValidationError as error:
+            return abort(422, error.messages)
+        else:
+            add_model_object(age_restriction)
+            return age_restriction, 201
 
 
 @age_restriction_ns.route('/<int:age_restriction_id>')
 class AgeRestrictionResource(Resource):
     """Age restriction singular resource"""
+
     @age_restriction_ns.marshal_with(age_restriction_model)
     def get(self, age_restriction_id: int):
         """Returns age restriction object"""
@@ -48,13 +55,22 @@ class AgeRestrictionResource(Resource):
     def put(self, age_restriction_id: int):
         """Updates age restriction and returns deserialized object"""
         age_restriction = AgeRestriction.query.get_or_404(age_restriction_id)
-        age_restriction = age_restriction_schema.load(request.json,
-                                                      instance=age_restriction, session=db.session)
-        return update_model_object(age_restriction)
+
+        try:
+            age_restriction = age_restriction_schema.load(request.json,
+                                                          instance=age_restriction,
+                                                          session=db.session,
+                                                          partial=True)
+        except ValidationError as error:
+            return abort(422, error.messages)
+        else:
+            update_model_object(age_restriction)
+            return age_restriction
 
     @admin_required
     @age_restriction_ns.response(204, 'Successfully deleted')
     def delete(self, age_restriction_id: int):
         """Deletes age restriction object"""
         age_restriction = AgeRestriction.query.get_or_404(age_restriction_id)
-        return delete_model_object(age_restriction)
+        delete_model_object(age_restriction)
+        return '', 204

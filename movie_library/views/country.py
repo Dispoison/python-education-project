@@ -1,7 +1,8 @@
 """Country view module"""
 
-from flask import request
+from flask import request, abort
 from flask_restx import Resource
+from marshmallow.exceptions import ValidationError
 
 from movie_library import api, db
 from movie_library.models import Country, country_model
@@ -18,6 +19,7 @@ country_ns = api.namespace(name='Country', path='/countries', description='count
 @country_ns.route('')
 class CountriesResource(Resource):
     """Country plural resource"""
+
     @country_ns.marshal_list_with(country_model)
     def get(self):
         """Returns list of country objects"""
@@ -29,13 +31,19 @@ class CountriesResource(Resource):
                              description='The country was successfully created')
     def post(self):
         """Creates country and returns deserialized object"""
-        country = country_schema.load(request.json, session=db.session)
-        return add_model_object(country)
+        try:
+            country = country_schema.load(request.json, session=db.session)
+        except ValidationError as error:
+            return abort(422, error.messages)
+        else:
+            add_model_object(country)
+            return country, 201
 
 
 @country_ns.route('/<int:country_id>')
 class CountryResource(Resource):
     """Country singular resource"""
+
     @country_ns.marshal_with(country_model)
     def get(self, country_id: int):
         """Returns country object"""
@@ -47,13 +55,21 @@ class CountryResource(Resource):
     def put(self, country_id: int):
         """Updates country and returns deserialized object"""
         country = Country.query.get_or_404(country_id)
-        country = country_schema.load(request.json, instance=country,
-                                      session=db.session, partial=True)
-        return update_model_object(country)
+        try:
+            country = country_schema.load(request.json,
+                                          instance=country,
+                                          session=db.session,
+                                          partial=True)
+        except ValidationError as error:
+            return abort(422, error.messages)
+        else:
+            update_model_object(country)
+            return country
 
     @admin_required
     @country_ns.response(204, 'Successfully deleted')
     def delete(self, country_id: int):
         """Deletes country object"""
         country = Country.query.get_or_404(country_id)
-        return delete_model_object(country)
+        delete_model_object(country)
+        return '', 204
