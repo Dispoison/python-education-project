@@ -7,11 +7,10 @@ from flask_restx import Api
 from flask_marshmallow import Marshmallow
 from flask_login import LoginManager
 
-
 app = Flask(__name__)
 app.config.from_object("config.DevelopmentConfig")
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 api = Api(app)
 ma = Marshmallow(app)
 login_manager = LoginManager(app)

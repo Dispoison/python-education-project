@@ -13,8 +13,9 @@ genre_model = api.model('Genre', {
 
 class Genre(db.Model):
     """Contains the properties and relationships of the genre of the movie"""
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
+    title = db.Column(db.String(100), unique=True, nullable=False)
 
     def __str__(self):
         return self.title
