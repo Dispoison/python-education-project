@@ -8,12 +8,12 @@ from flask_marshmallow import Marshmallow
 from flask_login import LoginManager
 
 app = Flask(__name__)
-app.config.from_object("config.DevelopmentConfig")
+app.config.from_object('config.DevelopmentConfig')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db, compare_type=True)
 api = Api(app)
 ma = Marshmallow(app)
 login_manager = LoginManager(app)
 
-from movie_library import views
 from movie_library import models
+from movie_library import views
