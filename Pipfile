@@ -18,6 +18,7 @@ marshmallow-sqlalchemy = "*"
 flask-login = "*"
 werkzeug = "*"
 marshmallow = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
