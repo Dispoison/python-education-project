@@ -9,8 +9,9 @@ from marshmallow.exceptions import ValidationError
 from movie_library import api, db
 from movie_library.models import Movie, movie_model_deserialize, movie_model_serialize
 from movie_library.schemes import MovieSchema
-from movie_library.utils import verify_ownership_by_user_id, \
-    add_model_object, update_model_object, delete_model_object
+from movie_library.utils import verify_ownership_by_user_id, OwnershipError, \
+    get_by_id_or_404, add_model_object, update_model_object, delete_model_object, \
+    log_error, log_info, log_object_info
 
 movie_schema = MovieSchema()
 
@@ -37,11 +38,16 @@ class MoviesResource(Resource):
             params = Movie.parse_query_parameters(request.args)
 
             movies = Movie.get_movies_by(params)
-        except ValueError as value_error:
-            return abort(400, str(value_error))
-        except NoResultFound as not_found:
-            return abort(404, str(not_found))
-        return movies
+
+            log_info()
+        except ValueError as error:
+            log_error(error)
+            return abort(400, str(error))
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        else:
+            return movies
 
     @login_required
     @movie_ns.expect(movie_model_serialize)
@@ -51,17 +57,21 @@ class MoviesResource(Resource):
         """Creates movie and returns deserialized object"""
         try:
             genres_ids = Movie.cut_genres_ids_from_request_json(request.json)
-
             request.json['user_id'] = current_user.get_id()
 
             movie = movie_schema.load(request.json, session=db.session)
 
             if genres_ids is not None:
                 movie.genres = Movie.get_genres_by_genres_ids(genres_ids)
+                request.json['genres'] = genres_ids
+
+            add_model_object(movie)
+
+            log_object_info(movie)
         except ValidationError as error:
+            log_error(error)
             return abort(422, error.messages)
         else:
-            add_model_object(movie)
             return movie, 201
 
 
@@ -72,38 +82,68 @@ class MovieResource(Resource):
     @movie_ns.marshal_with(movie_model_deserialize)
     def get(self, movie_id: int):
         """Returns movie object"""
-        return Movie.query.get_or_404(movie_id)
+        try:
+            movie = get_by_id_or_404(Movie, movie_id)
+
+            log_info()
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        else:
+            return movie
 
     @login_required
     @movie_ns.expect(movie_model_serialize)
     @movie_ns.marshal_with(movie_model_deserialize)
     def put(self, movie_id: int):
         """Updates movie and returns deserialized object"""
-        movie = Movie.query.get_or_404(movie_id)
-        verify_ownership_by_user_id(movie.user_id,
-                                    'A movie can only be edited by the user who added it '
-                                    'or by the administrator.')
         try:
+            movie = get_by_id_or_404(Movie, movie_id)
+            verify_ownership_by_user_id(movie.user_id,
+                                        'A movie can only be edited by the user who added it '
+                                        'or by the administrator.')
+
             genres_ids = Movie.cut_genres_ids_from_request_json(request.json)
 
             movie = movie_schema.load(request.json, instance=movie,
                                       session=db.session, partial=True)
-
             if genres_ids is not None:
                 movie.genres = Movie.get_genres_by_genres_ids(genres_ids)
+                request.json['genres'] = genres_ids
+
+            update_model_object()
+
+            log_object_info(movie)
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
         except ValidationError as error:
+            log_error(error)
             return abort(422, error.messages)
+        except OwnershipError as error:
+            log_error(error)
+            return abort(403, str(error))
         else:
-            update_model_object(movie)
             return movie
 
     @login_required
     @movie_ns.response(204, 'Successfully deleted')
     def delete(self, movie_id: int):
         """Deletes movie object"""
-        movie = Movie.query.get_or_404(movie_id)
-        verify_ownership_by_user_id(movie.user_id,
-                                    'A movie can only be deleted by the user who added it '
-                                    'or by the administrator.')
-        delete_model_object(movie)
-        return '', 204
+        try:
+            movie = get_by_id_or_404(Movie, movie_id)
+            verify_ownership_by_user_id(movie.user_id,
+                                        'A movie can only be deleted by the user who added it '
+                                        'or by the administrator.')
+
+            delete_model_object(movie)
+
+            log_object_info(movie)
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        except OwnershipError as error:
+            log_error(error)
+            return abort(403, str(error))
+        else:
+            return '', 204

@@ -5,7 +5,6 @@ from typing import List
 from marshmallow import fields, validates, ValidationError
 
 from movie_library import ma
-from movie_library.utils import admin_required
 from movie_library.models import Movie
 
 
@@ -59,7 +58,6 @@ class MovieSchema(ma.SQLAlchemyAutoSchema):
         if object_id < 1:
             raise ValidationError(f'The {var_name} must be bigger than 0.')
 
-    @admin_required
     @validates('user_id')
     def validate_user_id(self, user_id):
         MovieSchema.validate_id(user_id, 'user_id')

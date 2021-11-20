@@ -63,7 +63,7 @@ class Movie(db.Model):
         return self.title
 
     def __repr__(self):
-        return f'<Movie \'{self.title}\'>'
+        return f'<Movie \'{self.id}.{self.title}\'>'
 
     @staticmethod
     def parse_query_parameters(args: dict) -> dict:
@@ -142,7 +142,8 @@ class Movie(db.Model):
         """Cuts genres_ids from request.json if exist else return None"""
         genres_ids = None
         if 'genres' in request_json:
-            genres_ids = request_json.get('genres')
+            genres = request_json.get('genres')
+            genres_ids = genres if genres is not None else []
 
             from movie_library.schemes import MovieSchema
             MovieSchema.validate_genres_ids(genres_ids)
