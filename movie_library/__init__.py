@@ -16,9 +16,12 @@ migrate = Migrate(app, db, compare_type=True)
 api = Api(app)
 ma = Marshmallow(app)
 login_manager = LoginManager(app)
-log = Log(app.name)
+log = Log(app)
 
 from movie_library import models
 from movie_library import views
+
+from commands import add_commands
+add_commands(app)
 
 login_manager.anonymous_user = models.AnonymousUser
