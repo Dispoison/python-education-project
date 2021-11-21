@@ -3,19 +3,24 @@
 import logging
 from os import path
 
+from flask import Flask
+
 
 class Log:
     """Logging class"""
-    def __init__(self, app_name: str):
+    def __init__(self, app: Flask = None):
         """Constructor takes a string value of the application name"""
         self.file_path = path.dirname(__file__)
-        self.file_name = path.join(self.file_path, f'{app_name}.log')
-        self.logger = logging.getLogger(app_name)
-        self.logger.handlers.clear()
-        self._set_log()
+        self.file_name = None
+        self.logger = None
+        if app is not None:
+            self.init_app(app)
 
-    def _set_log(self):
+    def init_app(self, app: Flask):
         """Configures the logger"""
+        self.file_name = path.join(self.file_path, f'{app.name}.log')
+        self.logger = logging.getLogger(app.name)
+        self.logger.handlers.clear()
         self.logger.setLevel(logging.INFO)
         f_handler = logging.FileHandler(self.file_name)
         f_handler.setLevel(logging.INFO)

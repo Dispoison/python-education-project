@@ -33,3 +33,8 @@
 2021-11-21 20:46:03 - INFO - <User '2.Dispoison'> - POST - /movies - <Movie '112.string'> - {'title': 'string', 'release_date': '2021-11-21T17:12:19.973Z', 'duration': 0, 'rating': 0, 'description': 'string', 'preview': 'string', 'budget': 0, 'country_id': 1, 'age_restriction_id': 1, 'director_id': 1, 'user_id': '2', 'genres': [1]}
 2021-11-21 20:46:10 - ERROR - <User '2.Dispoison'> - GET - /movies?q=the&page=123123 - NoResultFound
 2021-11-21 20:46:10 - ERROR - <User '2.Dispoison'> - GET - /movies?q=the&page=123123 - NoResultFound
+2021-11-21 23:10:38 - INFO - <User '2.Dispoison'> - GET - /movies
+2021-11-21 23:34:55 - INFO - <User '2.Dispoison'> - POST - /user/logout
+2021-11-21 23:36:05 - INFO - <User '30.sonya'> - POST - /user/register
+2021-11-21 23:37:25 - INFO - <User '31.sonya'> - POST - /user/register
+2021-11-22 00:20:48 - INFO - <User '33.sonya'> - POST - /user/register

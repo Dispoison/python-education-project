@@ -7,7 +7,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 from flask_restx import Resource
 from marshmallow.exceptions import ValidationError
 
-from movie_library import app, api, db, log
+from movie_library import app, api, db
 from movie_library.models import login_model, register_model, user_info_model
 from movie_library.schemes import LoginSchema, RegisterSchema
 from movie_library.utils import AuthenticationError, add_model_object, \
