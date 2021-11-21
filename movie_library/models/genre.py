@@ -21,4 +21,4 @@ class Genre(db.Model):
         return self.title
 
     def __repr__(self):
-        return f'<Genre \'{self.title}\'>'
+        return f'<Genre \'{self.id}.{self.title}\'>'

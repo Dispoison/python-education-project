@@ -8,8 +8,8 @@ from marshmallow.exceptions import ValidationError
 from movie_library import api, db
 from movie_library.models import Director, director_model
 from movie_library.schemes import DirectorSchema
-from movie_library.utils import admin_required, add_model_object, \
-    update_model_object, delete_model_object
+from movie_library.utils import admin_required, add_model_object, update_model_object, \
+    delete_model_object, get_by_id_or_404, log_error, log_info, log_object_info
 
 director_schema = DirectorSchema()
 
@@ -30,11 +30,16 @@ class DirectorsResource(Resource):
             params = Director.parse_query_parameters(request.args)
 
             directors = Director.get_directors_by(params)
-        except ValueError as value_error:
-            return abort(400, str(value_error))
-        except NoResultFound as not_found:
-            return abort(404, str(not_found))
-        return directors
+
+            log_info()
+        except ValueError as error:
+            log_error(error)
+            return abort(400, str(error))
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        else:
+            return directors
 
     @admin_required
     @director_ns.expect(director_model)
@@ -44,42 +49,69 @@ class DirectorsResource(Resource):
         """Creates director and returns deserialized object"""
         try:
             director = director_schema.load(request.json, session=db.session)
+
+            add_model_object(director)
+
+            log_object_info(director)
         except ValidationError as error:
+            log_error(error)
             return abort(422, error.messages)
         else:
-            add_model_object(director)
             return director, 201
 
 
 @director_ns.route('/<int:director_id>')
 class DirectorResource(Resource):
-
     """Director singular resource"""
 
     @director_ns.marshal_with(director_model)
     def get(self, director_id: int):
         """Returns director object"""
-        return Director.query.get_or_404(director_id)
+        try:
+            director = get_by_id_or_404(Director, director_id)
+
+            log_info()
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        else:
+            return director
 
     @admin_required
     @director_ns.expect(director_model)
     @director_ns.marshal_with(director_model)
     def put(self, director_id: int):
         """Updates director and returns deserialized object"""
-        director = Director.query.get_or_404(director_id)
         try:
+            director = get_by_id_or_404(Director, director_id)
+
             director = director_schema.load(request.json, instance=director,
                                             session=db.session, partial=True)
+
+            update_model_object()
+
+            log_object_info(director)
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
         except ValidationError as error:
+            log_error(error)
             return abort(422, error.messages)
         else:
-            update_model_object(director)
             return director
 
     @admin_required
     @director_ns.response(204, 'Successfully deleted')
     def delete(self, director_id: int):
         """Deletes director object"""
-        director = Director.query.get_or_404(director_id)
-        delete_model_object(director)
-        return '', 204
+        try:
+            director = get_by_id_or_404(Director, director_id)
+
+            delete_model_object(director)
+
+            log_object_info(director)
+        except NoResultFound as error:
+            log_error(error)
+            return abort(404, str(error))
+        else:
+            return '', 204

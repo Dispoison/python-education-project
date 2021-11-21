@@ -24,4 +24,4 @@ class Country(db.Model):
         return self.title
 
     def __repr__(self):
-        return f'<Country \'{self.title}\' ({self.abbreviation})>'
+        return f'<Country \'{self.id}.{self.title} ({self.abbreviation})\'>'

@@ -23,4 +23,4 @@ class AgeRestriction(db.Model):
         return self.title
 
     def __repr__(self):
-        return f'<Age restriction \'{self.title}\'>'
+        return f'<Age restriction \'{self.id}.{self.title}\'>'

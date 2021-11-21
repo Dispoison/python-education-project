@@ -30,10 +30,10 @@ class Director(db.Model):
     movies = db.relationship('Movie', backref='director', lazy=True)
 
     def __str__(self):
-        return self.title
+        return f'{self.first_name} {self.last_name}'
 
     def __repr__(self):
-        return f'<Director \'{self.first_name} {self.last_name}\'>'
+        return f'<Director \'{self.id}.{self.first_name} {self.last_name}\'>'
 
     @staticmethod
     def parse_query_parameters(args: dict) -> dict:

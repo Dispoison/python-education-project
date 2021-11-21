@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from flask_restx import fields
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 
 from movie_library import db, login_manager, api
 
@@ -52,11 +52,13 @@ class User(db.Model, UserMixin):
         self.last_name = last_name
         self.is_admin = is_admin
 
-    def __str__(self):
-        return self.title
-
     def __repr__(self):
-        return f'<{"Admin" if self.is_admin else "User"} \'{self.username}\'>'
+        return f'<{"Admin" if self.is_admin else "User"} \'{self.id}.{self.username}\'>'
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def __repr__(self):
+        return '<AnonymousUser>'
 
 
 @login_manager.user_loader
