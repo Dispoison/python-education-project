@@ -5,7 +5,7 @@ from typing import List
 from marshmallow import fields, validates, ValidationError
 
 from movie_library import ma
-from movie_library.models import Movie
+from movie_library.models import Movie, Genre
 
 
 class MovieSchema(ma.SQLAlchemyAutoSchema):
@@ -79,3 +79,6 @@ class MovieSchema(ma.SQLAlchemyAutoSchema):
         if (not isinstance(genres_ids, list) or not all(isinstance(id_, int) for id_ in genres_ids)) and \
                 genres_ids is not None:
             raise ValidationError({'genres': ['Genres must be a list of integers.']})
+        for genre_id in genres_ids:
+            if not Genre.query.get(genre_id):
+                raise ValidationError({'genres': [f'Genre index {genre_id} does not exist.']})
