@@ -22,8 +22,8 @@ class CountrySchema(ma.SQLAlchemyAutoSchema):
             raise ValidationError('The title is longer than maximum length 100.')
         if len(title) <= 1:
             raise ValidationError('The title length must be longer than 1.')
-        if title != title.capitalize():
-            raise ValidationError('The title must be capitalized.')
+        if title[0] != title[0].upper():
+            raise ValidationError('The first letter of title must be in upper case.')
 
     @validates('abbreviation')
     def validate_abbreviation(self, abbreviation):

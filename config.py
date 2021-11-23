@@ -1,17 +1,26 @@
 from os import environ
 
 
+env = {'production': 'config.ProductionConfig',
+       'development': 'config.DevelopmentConfig',
+       'testing': 'config.TestingConfig',
+       'default': 'config.ProductionConfig'}
+
+
 class Config:
     DEBUG = False
-    SECRET_KEY = environ.get('SECRET_KEY')
+    TESTING = False
+    SECRET_KEY = 'secret_key'
     RESTX_MASK_SWAGGER = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class ProductionConfig(Config):
-    pass
+    SECRET_KEY = environ.get('SECRET_KEY')
 
 
 class DevelopmentConfig(Config):
+    ENV = 'development'
     DEBUG = True
     DB_USER = environ.get('DB_USER')
     DB_PASSWORD = environ.get('DB_PASSWORD')
@@ -20,4 +29,8 @@ class DevelopmentConfig(Config):
     DB_NAME = environ.get('DB_NAME')
 
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'

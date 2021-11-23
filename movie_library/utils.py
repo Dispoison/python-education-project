@@ -130,7 +130,7 @@ def log_object_info(object_: db.Model):
                     f' - {repr(object_)} - {request.json}')
 
 
-def log_error(error: Exception):
+def log_error(error: Exception, error_msg=None):
     """Saves a record of user request error, method, path, and error"""
     log.logger.error(f'{current_user} - {request.method} - '
-                     f'{request.full_path.rstrip("?")} - {error.__class__.__name__}')
+                     f'{request.full_path.rstrip("?")} - {error.__class__.__name__} - {error_msg}')

@@ -2,12 +2,12 @@
 
 from datetime import datetime
 
-from flask import request, make_response, abort
+from flask import request, make_response, abort, current_app
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_restx import Resource
 from marshmallow.exceptions import ValidationError
 
-from movie_library import app, api, db
+from movie_library import api, db
 from movie_library.models import login_model, register_model, user_info_model
 from movie_library.schemes import LoginSchema, RegisterSchema
 from movie_library.utils import AuthenticationError, add_model_object, \
@@ -74,13 +74,13 @@ class UserRegister(Resource):
 
             log_info()
         except ValidationError as error:
-            log_error(error)
+            log_error(error, error.messages)
             return abort(422, error.messages)
         else:
             return new_user, 201
 
 
-@app.before_request
+@current_app.before_request
 def update_user_last_activity():
     """Updates user last_activity field before every request"""
     if current_user.is_authenticated:
