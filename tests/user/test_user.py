@@ -4,7 +4,7 @@ import pytest
 import json
 from http import HTTPStatus
 
-from tests.utils import load_json
+from tests.utils import load_json, register
 
 
 @pytest.fixture(scope='function')
@@ -14,6 +14,7 @@ def users():
 
 class TestUser:
     """Tests register, logout and login"""
+
     def test_post_register(self, client, users):
         response = client.post('/user/register', data=json.dumps(users[0]),
                                content_type='application/json')
@@ -34,3 +35,14 @@ class TestUser:
         assert response.status_code == HTTPStatus.OK, \
             '[POST] /user/login should return 200'
         assert response.json['message'] == 'Successfully authorized.'
+
+    def test_post_password_change(self, client, users):
+        """Tests the change of user password"""
+        register(client, users[0])
+        response = client.post('/user/password-change',
+                               data=json.dumps({'old_password': 'password',
+                                                'new_password1': '12345',
+                                                'new_password2': '12345'}),
+                               content_type='application/json')
+        assert response.status_code == HTTPStatus.OK, \
+            '[POST] /user/password-change should return 200'

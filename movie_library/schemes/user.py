@@ -1,5 +1,6 @@
 """User schema module"""
 
+from flask_login import current_user
 from marshmallow import fields, pre_load, validates, ValidationError, EXCLUDE
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import or_
@@ -25,6 +26,29 @@ class LoginSchema(ma.SQLAlchemyAutoSchema):
         if not (user and check_password_hash(user.password, password)):
             raise AuthenticationError('Login or password are incorrect.')
         return user
+
+
+class PasswordChangeSchema(ma.SQLAlchemyAutoSchema):
+    """Schema for validating passwords on user password change"""
+    @staticmethod
+    def verify_password_with_current(password):
+        """Verifies input password with current user password"""
+        if not check_password_hash(current_user.password, password):
+            raise AuthenticationError('Old password is not correct')
+
+    @staticmethod
+    def validate_new_passwords(new_password1, new_password2):
+        """Validates two passwords on user password change"""
+        if not new_password1:
+            raise ValidationError({'new_password1': ['The new_password1 is missing']})
+        if not new_password2:
+            raise ValidationError({'new_password2': ['The new_password2 is missing']})
+        if new_password1 != new_password2:
+            raise ValidationError({'new_password2': ['New passwords are not equal.']})
+        if not (5 <= len(new_password1) <= 24):
+            raise ValidationError({'new_password1': ['The password length must be in range from 5 to 24.']})
+        if not new_password1.isalnum():
+            raise ValidationError({'new_password1': ['The password must be alphanumeric.']})
 
 
 class RegisterSchema(ma.SQLAlchemyAutoSchema):

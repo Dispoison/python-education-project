@@ -20,6 +20,11 @@ login_model = api.model('Login', {
     'username_or_email': fields.String(default='login'),
     'password': fields.String(default='password'),
 })
+password_change_model = api.model('PasswordChange', {
+    'old_password': fields.String(),
+    'new_password1': fields.String(),
+    'new_password2': fields.String(),
+})
 user_info_model = api.model('UserInfo', {
     'id': fields.Integer(readonly=True),
     'username': fields.String(readonly=True),
