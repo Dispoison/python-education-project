@@ -5,5 +5,6 @@ from .director import Director, director_model, director_info_model
 from .genre import Genre, genre_model
 from .country import Country, country_model
 from .age_restriction import AgeRestriction, age_restriction_model
-from .user import User, AnonymousUser, login_model, register_model, user_info_model
+from .user import User, AnonymousUser, login_model, \
+    register_model, user_info_model, password_change_model
 from .movie import Movie, movie_model_deserialize, movie_model_serialize
