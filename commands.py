@@ -12,6 +12,8 @@ from movie_library import db
 from movie_library.models import User
 from movie_library.schemes.user import RegisterSchema
 
+EMAIL_PATTERN = r'^[A-Za-z0-9]+[._]?[A-Za-z0-9]+[@][A-Za-z]+[.][a-z]{2,3}$'
+
 
 def add_commands(app: Flask):
     """Adds commands to application"""
@@ -25,7 +27,7 @@ def add_commands(app: Flask):
             register_schema.validate_username(username)
 
             email = input('Email: ')
-            if not match(r'^[A-Za-z0-9]+[._]?[A-Za-z0-9]+[@][A-Za-z]+[.][a-z]{2,3}$', email):
+            if not match(EMAIL_PATTERN, email):
                 raise ValidationError('The email has the wrong format')
             register_schema.validate_username(email)
 
@@ -44,20 +46,20 @@ def add_commands(app: Flask):
         except ValidationError as error:
             print(str(error))
 
-    @app.cli.command("create_tables")
-    def create_tables():
-        answer = input('Current tables will be dropped, are you sure? [yn]: ')
+    @app.cli.command("db_create_tables")
+    def db_create_tables():
+        answer = input('Current tables will be dropped, are you sure? [yN]: ')
         if answer.lower() == 'y':
             db.drop_all()
             db.create_all()
             db.session.commit()
-            print('Tables was successfully created.')
+            print('Tables were successfully recreated.')
 
-    @app.cli.command("insert_data")
-    def insert_data():
+    @app.cli.command("db_insert_data")
+    def db_insert_data():
         directory = 'db_insert_data'
         for file_name in sorted(listdir(directory)):
-            with open(path.join(directory, file_name)) as table_inserts:
+            with open(path.join(directory, file_name), encoding='utf8') as table_inserts:
                 print(f'Inserting data from {file_name}...')
                 insert_commands = table_inserts.read().replace('\n', '')
                 db.session.execute(insert_commands)

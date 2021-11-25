@@ -11,7 +11,7 @@ from movie_library.models import Movie, movie_model_deserialize, movie_model_ser
 from movie_library.schemes import MovieSchema
 from movie_library.utils import verify_ownership_by_user_id, OwnershipError, \
     get_by_id_or_404, add_model_object, update_model_object, delete_model_object, \
-    log_error, log_info, log_object_info
+    log_error, log_info, log_object_info, parse_query_parameters
 
 movie_schema = MovieSchema()
 
@@ -22,6 +22,7 @@ movie_ns = api.namespace(name='Movie', path='/movies', description='movie method
 class MoviesResource(Resource):
     """Movie plural resource"""
 
+    @staticmethod
     @movie_ns.param('sort', 'Sort parameter [rating;release_date,asc]')
     @movie_ns.param('genres',
                     'Filter by genres (AND, case insensitive exact match) [Horror,thriller]')
@@ -32,10 +33,10 @@ class MoviesResource(Resource):
     @movie_ns.param('page', 'Page number (default: 1)', type=int)
     @movie_ns.param('q', 'Movie title search substring')
     @movie_ns.marshal_list_with(movie_model_deserialize)
-    def get(self):
+    def get():
         """Returns list of movie objects"""
         try:
-            params = Movie.parse_query_parameters(request.args)
+            params = parse_query_parameters(request.args)
 
             movies = Movie.get_movies_by(params)
 
@@ -49,11 +50,12 @@ class MoviesResource(Resource):
         else:
             return movies
 
+    @staticmethod
     @login_required
     @movie_ns.expect(movie_model_serialize)
     @movie_ns.marshal_with(movie_model_deserialize, code=201,
                            description='The movie was successfully created')
-    def post(self):
+    def post():
         """Creates movie and returns deserialized object"""
         try:
             genres_ids = Movie.cut_genres_ids_from_request_json(request.json)
@@ -79,8 +81,9 @@ class MoviesResource(Resource):
 class MovieResource(Resource):
     """Movie singular resource"""
 
+    @staticmethod
     @movie_ns.marshal_with(movie_model_deserialize)
-    def get(self, movie_id: int):
+    def get(movie_id: int):
         """Returns movie object"""
         try:
             movie = get_by_id_or_404(Movie, movie_id)
@@ -92,10 +95,11 @@ class MovieResource(Resource):
         else:
             return movie
 
+    @staticmethod
     @login_required
     @movie_ns.expect(movie_model_serialize)
     @movie_ns.marshal_with(movie_model_deserialize)
-    def put(self, movie_id: int):
+    def put(movie_id: int):
         """Updates movie and returns deserialized object"""
         try:
             movie = get_by_id_or_404(Movie, movie_id)
@@ -126,9 +130,10 @@ class MovieResource(Resource):
         else:
             return movie
 
+    @staticmethod
     @login_required
     @movie_ns.response(204, 'Successfully deleted')
-    def delete(self, movie_id: int):
+    def delete(movie_id: int):
         """Deletes movie object"""
         try:
             movie = get_by_id_or_404(Movie, movie_id)

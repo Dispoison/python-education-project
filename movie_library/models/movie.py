@@ -65,30 +65,6 @@ class Movie(db.Model):
     def __repr__(self):
         return f'<Movie \'{self.id}.{self.title}\'>'
 
-    @staticmethod
-    def parse_query_parameters(args: dict) -> dict:
-        params = dict(args)
-        page = params.get('page', 1)
-        page_size = params.get('page_size', 10)
-
-        if isinstance(page, str) and not page.isdigit():
-            raise ValueError('Parameter page must be positive integer.')
-        params['page'] = int(page)
-
-        if isinstance(page_size, str) and not page_size.isdigit():
-            raise ValueError('Parameter page_size must be positive integer.')
-        params['page_size'] = int(page_size)
-
-        if params['page'] < 1:
-            raise ValueError('Parameter page must be greater than 0.')
-        if params['page_size'] < 1:
-            raise ValueError('Parameter page_size must be greater than 0.')
-
-        if params['page_size'] > 50:
-            raise ValueError('Parameter page_size maximum value is 50.')
-
-        return params
-
     @classmethod
     def get_movies_by(cls, params: dict) -> list:
         """Returns searched, paginated, sorted and filtered movies"""

@@ -11,18 +11,18 @@ class Log:
     def __init__(self, app: Flask = None):
         """Constructor takes a string value of the application name"""
         self.file_path = path.dirname(__file__)
-        self.file_name = None
+        self.log_path = None
         self.logger = None
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app: Flask):
         """Configures the logger"""
-        self.file_name = path.join(self.file_path, f'logs/{app.name}.log')
+        self.log_path = path.join(self.file_path, f'logs/{app.name}.log')
         self.logger = logging.getLogger(app.name)
         self.logger.handlers.clear()
         self.logger.setLevel(logging.INFO)
-        f_handler = logging.FileHandler(self.file_name)
+        f_handler = logging.FileHandler(self.log_path)
         f_handler.setLevel(logging.INFO)
         f_format = logging.Formatter('%(asctime)s - %(levelname)s - '
                                      '%(message)s', "%Y-%m-%d %H:%M:%S")
@@ -31,5 +31,5 @@ class Log:
 
     def clear_log(self):
         """Clears log file"""
-        with open(self.file_name, 'w'):
+        with open(self.log_path, 'w', encoding='utf8'):
             pass

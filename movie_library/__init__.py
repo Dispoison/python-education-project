@@ -19,6 +19,7 @@ log = Log()
 
 
 def create_app(config: str):
+    """Application factory creates application object"""
     app = Flask(__name__)
     app.config.from_object(env.get(config, env['default']))
     db.init_app(app)

@@ -1,3 +1,5 @@
+"""Project config module"""
+
 from os import environ
 
 
@@ -8,6 +10,7 @@ env = {'production': 'config.ProductionConfig',
 
 
 class Config:
+    """Base config"""
     DEBUG = False
     TESTING = False
     SECRET_KEY = 'secret_key'
@@ -16,6 +19,7 @@ class Config:
 
 
 class ProductionConfig(Config):
+    """Config used in production"""
     SECRET_KEY = environ.get('SECRET_KEY')
 
     DB_USER = environ.get('DB_USER')
@@ -28,6 +32,7 @@ class ProductionConfig(Config):
 
 
 class DevelopmentConfig(Config):
+    """Config used in development"""
     ENV = 'development'
     DEBUG = True
     DB_USER = environ.get('DB_USER')
@@ -40,5 +45,6 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
+    """Config used in testing"""
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'

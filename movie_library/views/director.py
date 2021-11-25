@@ -8,8 +8,9 @@ from marshmallow.exceptions import ValidationError
 from movie_library import api, db
 from movie_library.models import Director, director_model
 from movie_library.schemes import DirectorSchema
-from movie_library.utils import admin_required, add_model_object, update_model_object, \
-    delete_model_object, get_by_id_or_404, log_error, log_info, log_object_info
+from movie_library.utils import admin_required, add_model_object, \
+    update_model_object, delete_model_object, get_by_id_or_404, \
+    log_error, log_info, log_object_info, parse_query_parameters
 
 director_schema = DirectorSchema()
 
@@ -20,14 +21,15 @@ director_ns = api.namespace(name='Director', path='/directors', description='dir
 class DirectorsResource(Resource):
     """Director plural resource"""
 
+    @staticmethod
     @director_ns.param('page_size', 'Number of directors on page (default: 10)', type=int)
     @director_ns.param('page', 'Page number (default: 1)', type=int)
     @director_ns.param('q', 'Searching for a director using a substring of the full name')
     @director_ns.marshal_list_with(director_model)
-    def get(self):
+    def get():
         """Returns list of director objects"""
         try:
-            params = Director.parse_query_parameters(request.args)
+            params = parse_query_parameters(request.args)
 
             directors = Director.get_directors_by(params)
 
@@ -41,11 +43,12 @@ class DirectorsResource(Resource):
         else:
             return directors
 
+    @staticmethod
     @admin_required
     @director_ns.expect(director_model)
     @director_ns.marshal_with(director_model, code=201,
                               description='The director was successfully created')
-    def post(self):
+    def post():
         """Creates director and returns deserialized object"""
         try:
             director = director_schema.load(request.json, session=db.session)
@@ -64,8 +67,9 @@ class DirectorsResource(Resource):
 class DirectorResource(Resource):
     """Director singular resource"""
 
+    @staticmethod
     @director_ns.marshal_with(director_model)
-    def get(self, director_id: int):
+    def get(director_id: int):
         """Returns director object"""
         try:
             director = get_by_id_or_404(Director, director_id)
@@ -77,10 +81,11 @@ class DirectorResource(Resource):
         else:
             return director
 
+    @staticmethod
     @admin_required
     @director_ns.expect(director_model)
     @director_ns.marshal_with(director_model)
-    def put(self, director_id: int):
+    def put(director_id: int):
         """Updates director and returns deserialized object"""
         try:
             director = get_by_id_or_404(Director, director_id)
@@ -100,9 +105,10 @@ class DirectorResource(Resource):
         else:
             return director
 
+    @staticmethod
     @admin_required
     @director_ns.response(204, 'Successfully deleted')
-    def delete(self, director_id: int):
+    def delete(director_id: int):
         """Deletes director object"""
         try:
             director = get_by_id_or_404(Director, director_id)
