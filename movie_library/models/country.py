@@ -14,13 +14,14 @@ country_model = api.model('Country', {
 
 class Country(db.Model):
     """Contains the properties and relationships of the country"""
+
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100))
-    abbreviation = db.Column(db.String(2))
+    title = db.Column(db.String(100), unique=True, nullable=False)
+    abbreviation = db.Column(db.String(2), unique=True, nullable=False)
     movies = db.relationship('Movie', backref='country', lazy=True)
 
     def __str__(self):
         return self.title
 
     def __repr__(self):
-        return f'<Country \'{self.title}\' ({self.abbreviation})>'
+        return f'<Country \'{self.id}.{self.title} ({self.abbreviation})\'>'

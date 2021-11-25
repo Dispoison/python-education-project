@@ -1,0 +1,54 @@
+[
+   {
+      "title": "The Dark Knight",
+      "release_date": "2008-07-14 00:00:00.000000",
+      "duration": 152,
+      "rating": 8.50,
+      "description": "The Dark Knight is a 2008 superhero film directed, produced, and co-written by Christopher Nolan. Based on the DC Comics character Batman, the film is the second installment of Nolan's The Dark Knight Trilogy and a sequel to 2005's Batman Begins, starring Christian Bale and supported by Michael Caine, Heath Ledger, Gary Oldman, Aaron Eckhart, Maggie Gyllenhaal, and Morgan Freeman. In the film, Bruce Wayne / Batman (Bale), Police Lieutenant James Gordon (Oldman) and District Attorney Harvey Dent (Eckhart) form an alliance to dismantle organized crime in Gotham City, but are menaced by an anarchistic mastermind known as the Joker (Ledger), who seeks to undermine Batman's influence and throw the city into anarchy.",
+      "preview": "string",
+      "budget": 185000000,
+      "country_id": 1,
+      "age_restriction_id": 2,
+      "director_id": 1,
+      "genres": [1]
+   },
+   {
+      "title": "Terminator",
+      "release_date": "1984-10-26 00:00:00.000000",
+      "duration": 107,
+      "rating": 9.60,
+      "description": "The Dark Knight is a 2008 superhero film directed, produced, and co-written by Christopher Nolan. Based on the DC Comics character Batman, the film is the second installment of Nolan's The Dark Knight Trilogy and a sequel to 2005's Batman Begins, starring Christian Bale and supported by Michael Caine, Heath Ledger, Gary Oldman, Aaron Eckhart, Maggie Gyllenhaal, and Morgan Freeman. In the film, Bruce Wayne / Batman (Bale), Police Lieutenant James Gordon (Oldman) and District Attorney Harvey Dent (Eckhart) form an alliance to dismantle organized crime in Gotham City, but are menaced by an anarchistic mastermind known as the Joker (Ledger), who seeks to undermine Batman's influence and throw the city into anarchy.",
+      "preview": "string",
+      "budget": 6400000,
+      "country_id": 1,
+      "age_restriction_id": 1,
+      "director_id": 2,
+      "genres": [2, 3]
+   },
+   {
+      "title": "Forrest Gump",
+      "release_date": "1994-06-24 00:00:00.000000",
+      "duration": 142,
+      "rating": 9.20,
+      "description": "Forrest Gump is a 1994 American comedy-drama film directed by Robert Zemeckis and written by Eric Roth. It is based on the 1986 novel of the same name by Winston Groom and stars Tom Hanks, Robin Wright, Gary Sinise, Mykelti Williamson and Sally Field. The story depicts several decades in the life of Forrest Gump (Hanks), a slow-witted and kindhearted man from Alabama who witnesses and unwittingly influences several defining historical events in the 20th-century United States. The film differs substantially from the novel.",
+      "preview": "string",
+      "budget": 55000000,
+      "country_id": 1,
+      "age_restriction_id": 1,
+      "director_id": 3,
+      "genres": [1, 3]
+   },
+   {
+      "title": "Pulp Fiction",
+      "release_date": "1994-05-21 00:00:00.000000",
+      "duration": 154,
+      "rating": 9.20,
+      "description": "Pulp Fiction is a 1994 American crime black comedy film written and directed by Quentin Tarantino, who conceived it with Roger Avary.[4] Starring John Travolta, Samuel L. Jackson, Bruce Willis, Tim Roth, Ving Rhames, and Uma Thurman, it tells several stories of criminal Los Angeles. The title refers to the pulp magazines and hardboiled crime novels popular during the mid-20th century, known for their graphic violence and punchy dialogue.",
+      "preview": "string",
+      "budget": 8250000,
+      "country_id": 1,
+      "age_restriction_id": 4,
+      "director_id": 3,
+      "genres": [3]
+   }
+]

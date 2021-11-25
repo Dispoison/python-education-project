@@ -1,21 +1,44 @@
+from os import environ
+
+
+env = {'production': 'config.ProductionConfig',
+       'development': 'config.DevelopmentConfig',
+       'testing': 'config.TestingConfig',
+       'default': 'config.ProductionConfig'}
+
+
 class Config:
     DEBUG = False
-    SECRET_KEY = 'gk8V4MspZKC6jg8w0MGyjvF5b9BnUEwq'
+    TESTING = False
+    SECRET_KEY = 'secret_key'
     RESTX_MASK_SWAGGER = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class ProductionConfig(Config):
-    pass
+    SECRET_KEY = environ.get('SECRET_KEY')
+
+    DB_USER = environ.get('DB_USER')
+    DB_PASSWORD = environ.get('DB_PASSWORD')
+    DB_HOST = environ.get('DB_HOST')
+    DB_PORT = environ.get('DB_PORT')
+    DB_NAME = environ.get('DB_NAME')
+
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 
 class DevelopmentConfig(Config):
+    ENV = 'development'
     DEBUG = True
-
-    DB_USER = 'postgres'
-    DB_PASSWORD = 'postgres_password'
-    DB_HOST = 'localhost'
-    DB_PORT = '5432'
-    DB_NAME = 'movie_library'
+    DB_USER = environ.get('DB_USER')
+    DB_PASSWORD = environ.get('DB_PASSWORD')
+    DB_HOST = environ.get('DB_HOST')
+    DB_PORT = environ.get('DB_PORT')
+    DB_NAME = environ.get('DB_NAME')
 
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'

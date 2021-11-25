@@ -3,22 +3,22 @@
 from datetime import datetime
 
 from flask_restx import fields
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 
 from movie_library import db, login_manager, api
 
 
 register_model = api.model('Register', {
-    'username': fields.String(),
-    'email': fields.String(),
-    'password': fields.String(),
-    'password2': fields.String(),
+    'username': fields.String(default='login'),
+    'email': fields.String(default='email@mail.com'),
+    'password1': fields.String(default='password'),
+    'password2': fields.String(default='password'),
     'first_name': fields.String(),
     'last_name': fields.String(),
 })
 login_model = api.model('Login', {
-    'username_or_email': fields.String(),
-    'password': fields.String(),
+    'username_or_email': fields.String(default='login'),
+    'password': fields.String(default='password'),
 })
 user_info_model = api.model('UserInfo', {
     'id': fields.Integer(readonly=True),
@@ -31,6 +31,7 @@ user_info_model = api.model('UserInfo', {
 
 class User(db.Model, UserMixin):
     """Contains the properties and relationships of the user"""
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
@@ -42,7 +43,7 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(50))
     movies = db.relationship('Movie', backref='user', lazy=True)
 
-    def __init__(self, username, email, password, first_name, last_name, is_admin=False):
+    def __init__(self, username, email, password, first_name=None, last_name=None, is_admin=False):
         """Constructor for registering new user"""
         self.username = username
         self.email = email
@@ -51,11 +52,13 @@ class User(db.Model, UserMixin):
         self.last_name = last_name
         self.is_admin = is_admin
 
-    def __str__(self):
-        return self.title
-
     def __repr__(self):
-        return f'<{"Admin" if self.is_admin else "User"} \'{self.username}\'>'
+        return f'<{"Admin" if self.is_admin else "User"} \'{self.id}.{self.username}\'>'
+
+
+class AnonymousUser(AnonymousUserMixin):
+    def __repr__(self):
+        return '<AnonymousUser>'
 
 
 @login_manager.user_loader

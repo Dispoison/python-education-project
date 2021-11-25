@@ -17,6 +17,10 @@ flask-marshmallow = "*"
 marshmallow-sqlalchemy = "*"
 flask-login = "*"
 werkzeug = "*"
+marshmallow = "*"
+python-dotenv = "*"
+pytest = "*"
+gunicorn = "*"
 
 [dev-packages]
 

@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 
 .idea/
+
+.env
+.env.postgres
+
+logs/

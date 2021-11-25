@@ -2,19 +2,19 @@
 
 from datetime import datetime
 
-from flask import request, make_response, abort
-from flask_login import login_user, current_user, logout_user
+from flask import request, make_response, abort, current_app
+from flask_login import login_user, current_user, logout_user, login_required
 from flask_restx import Resource
-from sqlalchemy import or_
-from werkzeug.security import check_password_hash, generate_password_hash
+from marshmallow.exceptions import ValidationError
 
-from movie_library import app, api, db
-from movie_library.models import User, login_model, register_model, user_info_model
-from movie_library.schemes import UserSchema
-from movie_library.utils import add_model_object
+from movie_library import api, db
+from movie_library.models import login_model, register_model, user_info_model
+from movie_library.schemes import LoginSchema, RegisterSchema
+from movie_library.utils import AuthenticationError, add_model_object, \
+    unauthorized_required, refresh_and_login_user, log_error, log_info
 
-
-user_schema = UserSchema()
+login_schema = LoginSchema()
+register_schema = RegisterSchema()
 
 user_ns = api.namespace(name='User', path='/user', description='user methods')
 
@@ -22,81 +22,65 @@ user_ns = api.namespace(name='User', path='/user', description='user methods')
 @user_ns.route('/login')
 class UserLogin(Resource):
     """User login resource"""
+
+    @unauthorized_required
     @user_ns.expect(login_model)
     def post(self):
         """Provides user authentication"""
-        if current_user.is_authenticated:
-            return make_response({'message': f'You are already logged in '
-                                             f'as {current_user.username}.'}, 400)
-        username_or_email = request.json['username_or_email']
-        password = request.json['password']
+        try:
+            login = request.json.get('username_or_email')
+            password = request.json.get('password')
+            login_schema.validate_user_login(login, password)
+            user = login_schema.authenticate_user(login, password)
+            refresh_and_login_user(user)
 
-        if username_or_email and password:
-            user = User.query.filter(or_(User.username == username_or_email,
-                                         User.email == username_or_email)).first()
-
-            if user and check_password_hash(user.password, password):
-                user.last_activity = datetime.now()
-                db.session.commit()
-                login_user(user)
-                return make_response({'message': 'Successfully authorized.'}, 200)
-
-            return make_response({'message': 'Username or password are incorrect.'}, 401)
-
-        return make_response({'message': 'Fill in the username and password fields.'}, 401)
+            log_info()
+        except ValidationError as error:
+            log_error(error)
+            return abort(400, error.messages)
+        except AuthenticationError as error:
+            log_error(error)
+            return abort(401, str(error))
+        else:
+            return make_response({'message': 'Successfully authorized.'}, 200)
 
 
 @user_ns.route('/logout')
 class UserLogout(Resource):
     """User logout resource"""
+    @login_required
     def post(self):
         """Provides user logout"""
         if current_user.is_authenticated:
+            log_info()
             logout_user()
             return make_response({'message': 'Successfully logout.'}, 200)
-        return make_response({'message': 'You cannot logout because you are not authorized.'}, 401)
 
 
 @user_ns.route('/register')
 class UserRegister(Resource):
     """User register resource"""
+
+    @unauthorized_required
     @user_ns.expect(register_model)
     @user_ns.marshal_with(user_info_model, code=201)
     def post(self):
         """Provides creating new user"""
-        if current_user.is_authenticated:
-            return abort(400, f'You are already logged in as {current_user.username}.')
+        try:
+            new_user = register_schema.load(request.json, session=db.session)
 
-        username = request.json.get('username')
-        email = request.json.get('email')
-        password = request.json.get('password')
-        password2 = request.json.get('password2')
-        first_name = request.json.get('first_name')
-        last_name = request.json.get('last_name')
-
-        if all([username, email, password, password2, first_name, last_name]):
-            user_by_username = User.query.filter_by(username=username).first()
-            if user_by_username:
-                return abort(409, 'Username already exists.')
-
-            user_by_email = User.query.filter_by(email=email).first()
-            if user_by_email:
-                return abort(409, 'Email already exists.')
-
-            if password != password2:
-                return abort(400, 'Passwords are not equal.')
-
-            hash_pwd = generate_password_hash(password)
-            new_user = User(username=username, email=email, password=hash_pwd,
-                            first_name=first_name, last_name=last_name)
+            add_model_object(new_user)
             login_user(new_user)
-            return add_model_object(new_user)
 
-        return abort(400, 'Fill in the username, email, password, password2, '
-                          'first_name and last_name fields.')
+            log_info()
+        except ValidationError as error:
+            log_error(error, error.messages)
+            return abort(422, error.messages)
+        else:
+            return new_user, 201
 
 
-@app.before_request
+@current_app.before_request
 def update_user_last_activity():
     """Updates user last_activity field before every request"""
     if current_user.is_authenticated:
