@@ -1,0 +1,36 @@
+version: "3.3"
+
+services:
+  postgres_db:
+    image: postgres:14.0
+    restart: always
+    env_file:
+      - .env.postgres
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build: .
+    restart: on-failure
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+    volumes:
+      - .movie_library/logs:/usr/src/python-education-project/movie_library/logs
+
+  nginx:
+    build: ./nginx
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+
+volumes:
+  db-data:
