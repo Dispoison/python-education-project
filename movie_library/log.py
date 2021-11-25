@@ -18,7 +18,7 @@ class Log:
 
     def init_app(self, app: Flask):
         """Configures the logger"""
-        self.file_name = path.join(self.file_path, f'{app.name}.log')
+        self.file_name = path.join(self.file_path, f'logs/{app.name}.log')
         self.logger = logging.getLogger(app.name)
         self.logger.handlers.clear()
         self.logger.setLevel(logging.INFO)

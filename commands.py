@@ -1,5 +1,6 @@
 """Commands module"""
 
+from os import listdir, path
 from re import match
 from getpass import getpass
 
@@ -42,3 +43,24 @@ def add_commands(app: Flask):
             print(f'{repr(admin)} successfully created')
         except ValidationError as error:
             print(str(error))
+
+    @app.cli.command("create_tables")
+    def create_tables():
+        answer = input('Current tables will be dropped, are you sure? [yn]: ')
+        if answer.lower() == 'y':
+            db.drop_all()
+            db.create_all()
+            db.session.commit()
+            print('Tables was successfully created.')
+
+    @app.cli.command("insert_data")
+    def insert_data():
+        directory = 'db_insert_data'
+        for file_name in sorted(listdir(directory)):
+            with open(path.join(directory, file_name)) as table_inserts:
+                print(f'Inserting data from {file_name}...')
+                insert_commands = table_inserts.read().replace('\n', '')
+                db.session.execute(insert_commands)
+                print(f'Data from {file_name} was successfully inserted.')
+        db.session.commit()
+        print('All data was successfully inserted.')
