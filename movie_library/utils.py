@@ -49,13 +49,38 @@ def get_order_objects_list(sort_data: List[str], model_cls: Type[db.Model],
     return order_by
 
 
+def parse_query_parameters(args: dict) -> dict:
+    """Parses and validates query parameters from dictionary"""
+    params = dict(args)
+    page = params.get('page', 1)
+    page_size = params.get('page_size', 10)
+
+    if isinstance(page, str) and not page.isdigit():
+        raise ValueError('Parameter page must be positive integer.')
+    params['page'] = int(page)
+
+    if isinstance(page_size, str) and not page_size.isdigit():
+        raise ValueError('Parameter page_size must be positive integer.')
+    params['page_size'] = int(page_size)
+
+    if params['page'] < 1:
+        raise ValueError('Parameter page must be greater than 0.')
+    if params['page_size'] < 1:
+        raise ValueError('Parameter page_size must be greater than 0.')
+
+    if params['page_size'] > 50:
+        raise ValueError('Parameter page_size maximum value is 50.')
+
+    return params
+
+
 def verify_ownership_by_user_id(user_id: int, error_message: str):
     """Checks ownership of current user according to user_id or if admin"""
     if not (current_user.is_admin or current_user.id == user_id):
         raise OwnershipError(error_message)
 
 
-def admin_required(function: Callable):
+def admin_required(function: Callable) -> Callable:
     """Decorator raises 403 exception if current user is not admin"""
 
     @wraps(function)
@@ -67,7 +92,7 @@ def admin_required(function: Callable):
     return wrapper
 
 
-def unauthorized_required(function: Callable):
+def unauthorized_required(function: Callable) -> Callable:
     """Decorator raises 400 exception if current user authenticated"""
 
     @wraps(function)
@@ -130,7 +155,7 @@ def log_object_info(object_: db.Model):
                     f' - {repr(object_)} - {request.json}')
 
 
-def log_error(error: Exception, error_msg=None):
+def log_error(error: Exception):
     """Saves a record of user request error, method, path, and error"""
     log.logger.error(f'{current_user} - {request.method} - '
-                     f'{request.full_path.rstrip("?")} - {error.__class__.__name__} - {error_msg}')
+                     f'{request.full_path.rstrip("?")} - {error.__class__.__name__}')

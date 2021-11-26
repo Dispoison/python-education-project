@@ -22,8 +22,9 @@ genre_ns = api.namespace(name='Genre', path='/genres', description='genre method
 class GenresResource(Resource):
     """Genre plural resource"""
 
+    @staticmethod
     @genre_ns.marshal_list_with(genre_model)
-    def get(self):
+    def get():
         """Returns list of genre objects"""
         try:
             genres = get_all_or_404(Genre)
@@ -35,10 +36,11 @@ class GenresResource(Resource):
         else:
             return genres
 
+    @staticmethod
     @admin_required
     @genre_ns.expect(genre_model)
     @genre_ns.marshal_with(genre_model, code=201, description='The genre was successfully created')
-    def post(self):
+    def post():
         """Creates genre and returns deserialized object"""
         try:
             genre = genre_schema.load(request.json, session=db.session)
@@ -56,8 +58,9 @@ class GenresResource(Resource):
 class GenreResource(Resource):
     """Genre singular resource"""
 
+    @staticmethod
     @genre_ns.marshal_with(genre_model)
-    def get(self, genre_id: int):
+    def get(genre_id: int):
         """Returns genre object"""
         try:
             genre = get_by_id_or_404(Genre, genre_id)
@@ -69,10 +72,11 @@ class GenreResource(Resource):
         else:
             return genre
 
+    @staticmethod
     @admin_required
     @genre_ns.expect(genre_model)
     @genre_ns.marshal_with(genre_model)
-    def put(self, genre_id: int):
+    def put(genre_id: int):
         """Updates genre and returns deserialized object"""
         try:
             genre = get_by_id_or_404(Genre, genre_id)
@@ -91,9 +95,10 @@ class GenreResource(Resource):
         else:
             return genre
 
+    @staticmethod
     @admin_required
     @genre_ns.response(204, 'Successfully deleted')
-    def delete(self, genre_id: int):
+    def delete(genre_id: int):
         """Deletes genre object"""
         try:
             genre = get_by_id_or_404(Genre, genre_id)

@@ -1,3 +1,5 @@
+"""Main test fixtures module"""
+
 import pytest
 
 from movie_library import create_app, db
@@ -6,12 +8,14 @@ from tests.utils import create_superuser, create_user, create_another_user, logi
 
 @pytest.fixture(scope='session')
 def app():
+    """Creates application object with testing config"""
     app = create_app('testing')
     yield app
 
 
 @pytest.fixture(scope='class', autouse=True)
 def client(app):
+    """Creates client with admin and two users"""
     with app.app_context():
         db.create_all()
         create_superuser(db)
@@ -26,6 +30,7 @@ def client(app):
 
 @pytest.fixture(scope='class')
 def login(client):
+    """Fixture for login user before and logout after inner functionality"""
     login_user(client)
     yield
     logout_user(client)
@@ -33,6 +38,7 @@ def login(client):
 
 @pytest.fixture(scope='class')
 def login_admin(client):
+    """Fixture for login admin before and logout after inner functionality"""
     login_user(client, login='admin', password='admin')
     yield
     logout_user(client)

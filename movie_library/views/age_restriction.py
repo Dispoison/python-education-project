@@ -22,8 +22,9 @@ age_restriction_ns = api.namespace(name='AgeRestriction', path='/age_restriction
 class AgeRestrictionsResource(Resource):
     """Age restriction plural resource"""
 
+    @staticmethod
     @age_restriction_ns.marshal_list_with(age_restriction_model)
-    def get(self):
+    def get():
         """Returns list of age restriction objects"""
         try:
             age_restrictions = get_all_or_404(AgeRestriction)
@@ -35,11 +36,12 @@ class AgeRestrictionsResource(Resource):
         else:
             return age_restrictions
 
+    @staticmethod
     @admin_required
     @age_restriction_ns.expect(age_restriction_model)
     @age_restriction_ns.marshal_with(age_restriction_model, code=201,
                                      description='The age restriction was successfully created')
-    def post(self):
+    def post():
         """Creates age restriction and returns deserialized object"""
         try:
             age_restriction = age_restriction_schema.load(request.json, session=db.session)
@@ -58,8 +60,9 @@ class AgeRestrictionsResource(Resource):
 class AgeRestrictionResource(Resource):
     """Age restriction singular resource"""
 
+    @staticmethod
     @age_restriction_ns.marshal_with(age_restriction_model)
-    def get(self, age_restriction_id: int):
+    def get(age_restriction_id: int):
         """Returns age restriction object"""
         try:
             age_restriction = get_by_id_or_404(AgeRestriction, age_restriction_id)
@@ -71,10 +74,11 @@ class AgeRestrictionResource(Resource):
         else:
             return age_restriction
 
+    @staticmethod
     @admin_required
     @age_restriction_ns.expect(age_restriction_model)
     @age_restriction_ns.marshal_with(age_restriction_model)
-    def put(self, age_restriction_id: int):
+    def put(age_restriction_id: int):
         """Updates age restriction and returns deserialized object"""
         try:
             age_restriction = get_by_id_or_404(AgeRestriction, age_restriction_id)
@@ -96,9 +100,10 @@ class AgeRestrictionResource(Resource):
         else:
             return age_restriction
 
+    @staticmethod
     @admin_required
     @age_restriction_ns.response(204, 'Successfully deleted')
-    def delete(self, age_restriction_id: int):
+    def delete(age_restriction_id: int):
         """Deletes age restriction object"""
         try:
             age_restriction = get_by_id_or_404(AgeRestriction, age_restriction_id)

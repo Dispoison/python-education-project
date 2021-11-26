@@ -27,9 +27,10 @@ user_ns = api.namespace(name='User', path='/user', description='user methods')
 class UserLogin(Resource):
     """User login resource"""
 
+    @staticmethod
     @unauthorized_required
     @user_ns.expect(login_model)
-    def post(self):
+    def post():
         """Provides user authentication"""
         try:
             login = request.json.get('username_or_email')
@@ -52,21 +53,24 @@ class UserLogin(Resource):
 @user_ns.route('/logout')
 class UserLogout(Resource):
     """User logout resource"""
+
+    @staticmethod
     @login_required
-    def post(self):
+    def post():
         """Provides user logout"""
-        if current_user.is_authenticated:
-            log_info()
-            logout_user()
-            return make_response({'message': 'Successfully logout.'}, 200)
+        log_info()
+        logout_user()
+        return make_response({'message': 'Successfully logout.'}, 200)
 
 
 @user_ns.route('/password-change')
 class UserPasswordChange(Resource):
     """User password changing"""
+
+    @staticmethod
     @login_required
     @user_ns.expect(password_change_model)
-    def post(self):
+    def post():
         """Provides user password change"""
         try:
             old_password = request.json.get('old_password')
@@ -98,10 +102,11 @@ class UserPasswordChange(Resource):
 class UserRegister(Resource):
     """User register resource"""
 
+    @staticmethod
     @unauthorized_required
     @user_ns.expect(register_model)
     @user_ns.marshal_with(user_info_model, code=201)
-    def post(self):
+    def post():
         """Provides creating new user"""
         try:
             new_user = register_schema.load(request.json, session=db.session)
@@ -111,7 +116,7 @@ class UserRegister(Resource):
 
             log_info()
         except ValidationError as error:
-            log_error(error, error.messages)
+            log_error(error)
             return abort(422, error.messages)
         else:
             return new_user, 201
