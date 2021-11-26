@@ -9,14 +9,17 @@ from movie_library.models import AgeRestriction
 
 
 class AgeRestrictionSchema(ma.SQLAlchemyAutoSchema):
+    """Schema for age restriction model validation"""
     title = fields.String(required=True)
 
     class Meta:
+        """Options class for schema"""
         model = AgeRestriction
         load_instance = True
 
     @validates('title')
-    def validate_title(self, title):
+    def validate_title(self, title: str):
+        """Validates age restriction title"""
         if AgeRestriction.query.filter_by(title=title).first():
             raise ValidationError('The title value already exists.')
         if len(title) > 3:

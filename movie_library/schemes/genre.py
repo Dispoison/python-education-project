@@ -7,14 +7,17 @@ from movie_library.models import Genre
 
 
 class GenreSchema(ma.SQLAlchemyAutoSchema):
+    """Schema for genre model validation"""
     title = fields.String(required=True)
 
     class Meta:
+        """Options class for schema"""
         model = Genre
         load_instance = True
 
     @validates('title')
-    def validate_title(self, title):
+    def validate_title(self, title: str):
+        """Validates genre title"""
         if Genre.query.filter_by(title=title).first():
             raise ValidationError('The title value already exists.')
         if len(title) > 100:

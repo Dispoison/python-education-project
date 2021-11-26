@@ -21,8 +21,9 @@ country_ns = api.namespace(name='Country', path='/countries', description='count
 class CountriesResource(Resource):
     """Country plural resource"""
 
+    @staticmethod
     @country_ns.marshal_list_with(country_model)
-    def get(self):
+    def get():
         """Returns list of country objects"""
         try:
             countries = get_all_or_404(Country)
@@ -34,11 +35,12 @@ class CountriesResource(Resource):
         else:
             return countries
 
+    @staticmethod
     @admin_required
     @country_ns.expect(country_model)
     @country_ns.marshal_with(country_model, code=201,
                              description='The country was successfully created')
-    def post(self):
+    def post():
         """Creates country and returns deserialized object"""
         try:
             country = country_schema.load(request.json, session=db.session)
@@ -57,8 +59,9 @@ class CountriesResource(Resource):
 class CountryResource(Resource):
     """Country singular resource"""
 
+    @staticmethod
     @country_ns.marshal_with(country_model)
-    def get(self, country_id: int):
+    def get(country_id: int):
         """Returns country object"""
         try:
             country = get_by_id_or_404(Country, country_id)
@@ -70,10 +73,11 @@ class CountryResource(Resource):
         else:
             return country
 
+    @staticmethod
     @admin_required
     @country_ns.expect(country_model)
     @country_ns.marshal_with(country_model)
-    def put(self, country_id: int):
+    def put(country_id: int):
         """Updates country and returns deserialized object"""
         try:
             country = get_by_id_or_404(Country, country_id)
@@ -95,9 +99,10 @@ class CountryResource(Resource):
         else:
             return country
 
+    @staticmethod
     @admin_required
     @country_ns.response(204, 'Successfully deleted')
-    def delete(self, country_id: int):
+    def delete(country_id: int):
         """Deletes country object"""
         try:
             country = get_by_id_or_404(Country, country_id)
